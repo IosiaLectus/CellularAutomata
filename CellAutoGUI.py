@@ -7,7 +7,7 @@ from pygame.locals import *
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 
-Aut = Automata(1999,1)
+Aut = Automata1D(1999,1)
 Aut.setRule(30)
 
 Width = 4000
