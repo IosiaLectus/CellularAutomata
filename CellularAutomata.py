@@ -1,78 +1,54 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Nov 07 14:23:29 2014
-
-@author: Josiah
-"""
 
 import random
 
 class Automata1D:
+
+    # The number of cells in our automaton
+    size = 1
+    # Size of a neighborhood
+    NBHDSIZE = 3
+    # The number of distinct states a neighborhood can be in.
+    NUM_STATES = 2**NBHDSIZE
+    # The number of possible rules:
+    NUM_RULES = 2**NUM_STATES
     
-    dim = 1
-    n = 1
-    numNeighbors = 3
-    
+    #lists for storing the state of the system at three differnt time steps.
     past = [];
     present = [];
     future = [];
     
-    ruleNum = 0
+    # Rule stored a an integer. This will get parsed into a lookup table
+    rule = 0
     
-    def __init__(self,n,d):
-        self.dim = d
-        self.numNeighbors = 3**d
-        self.past = [0 for i in range(0,n**self.dim)]
+    def __init__(self,s,r):
+        self.past = [0 for i in range(0,s)]
         self.present = list(self.past)
         self.future = list(self.present)
-        self.n = n
-        self.ruleArray = self.parseRule(self.ruleNum)
+        self.size = s
+	self.rule = r%self.NUM_RULES
+        self.ruleArray = self.parseRule(r)
         
+    # Change the rule
     def setRule(self,r):
-        self.ruleNum = r%(2**(2**self.numNeighbors))
-        self.ruleArray = self.parseRule(self.ruleNum)
+        self.rule = r%self.NUM_RULES
+        self.ruleArray = self.parseRule(r)
     
+    # Get the neighborhood of a cell as a list. Note that cell neighborhoods wrap (the first and last cells are neighbors).
     def Neighbors(self,m):
-        ret = []
-        mm = m
-        coords = [0 for i in range(0,self.dim)]
-        for i in range(0,self.dim):
-            coords[i] = mm%self.n
-            mm = mm-mm%self.n
-            mm = mm/self.n
-        for i in range(0,self.numNeighbors):
-            nary = self.Base3(i)
-            coordsN = coords[:]
-            mmm = 0
-            for j in range(0,len(nary)):
-                coordsN[j] += nary[j]
-            for j in range(0,len(coordsN)):
-                coordsN[j] += (self.n -1)
-                coordsN[j] = coordsN[j]%self.n
-                mmm += (2**j)*coordsN[j]
-            ret.append(mmm)
-        #return [(m-1)%self.n,m%self.n,(m+1)%self.n]
-        return ret
+        return [(m-1)%self.size,m%self.size,(m+1)%self.size]
         
-    def rule(self,n):
+    # Given the state of a cell and it's neighbors, look up the updated state for the cell.
+    def apply_rule(self,n):
         nbrs = self.Neighbors(n)
         state = 0
         for i in range(0,len(nbrs)):
             state += (2**i)*self.present[nbrs[i]]
         return self.ruleArray[state]
-        
-    def Base3(self,x):
-        y = x
-        ret = []
-        while(y>0):
-            ret.append(y%3)
-            y = y - y%3
-            y = y/3
-        return ret
-        
+
+    # Create a lookup table based on rule
     def parseRule(self, x):
         y = x
-        ret = [0 for i in range(0,2**self.numNeighbors)]
+        ret = [0 for i in range(0, self.NUM_STATES)]
         i = 0
         while(y>0):
             ret[i] = y%2
@@ -81,19 +57,23 @@ class Automata1D:
             y = y/2
         return ret
     
+    # Update the automaton by one time step.
     def step(self):
-        for i in range(0,self.n):
-            self.future[i] = self.rule(i)
+        for i in range(0,self.size):
+            self.future[i] = self.apply_rule(i)
         self.past = list(self.present)
         self.present = list(self.future)
         
+    # Put a living cell at index n.
     def populate(self,n):
-        self.present[n] = 1
+        self.present[n%self.size] = 1
         
+    # Randomly place x living cells within the automaton.
     def populateRandom(self,x):
         for i in range(0,x):
-            self.populate(random.randint(0,self.n-1))
-            
+            self.populate(random.randint(0,self.size-1))
+      
+    # Update through t steps      
     def play(self,t):
         for i in range(0,t):
             self.step()
@@ -101,19 +81,7 @@ class Automata1D:
             print
 
 def Main():
-    a = Automata(5,2)
-    a.setRule(110)
-    a.populate(0)
-    print
-    print a.ruleNum
-    print
-    print a.ruleArray
-    print
-    print
-    print a.present
-    print
-    a.play(1)
-    print "\nThe main function executed\n"
+    return
     
 if __name__ == "__main__":
     Main()

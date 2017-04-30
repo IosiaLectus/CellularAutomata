@@ -20,10 +20,9 @@ FPS = 5
 def run_1DAutomata(screen, size, rule):
 
     # Create the cellular automaton object
-    Aut = Automata1D(size,1)
-    Aut.setRule(rule)
+    Aut = Automata1D(size,rule)
     # Given the screen size and the size of the automaton, decide the size of each cell in pixels.
-    dt = WIDTH/Aut.n
+    dt = WIDTH/Aut.size
     # Create a live cell in the center
     Aut.populate(int(size/2))
     # Display the automaton in the top 85% of the screen, reserving the rest for buttons
@@ -54,7 +53,7 @@ def run_1DAutomata(screen, size, rule):
             # Draw the cells to the screen
             screen.fill(WHITE)
             for i in range(0,len(grid)):
-                for j in range(0,Aut.n):
+                for j in range(0,Aut.size):
                     if grid[i][j] == 1:
                         pygame.draw.rect(screen,BLACK,(j*dt,i*dt,dt,dt),0)
 
