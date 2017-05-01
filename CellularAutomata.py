@@ -3,29 +3,25 @@ import random
 
 class Automata1D:
 
-    # The number of cells in our automaton
-    size = 1
+    # Number of states of a single cell
+    CELL_STATES = 2
     # Size of a neighborhood
     NBHDSIZE = 3
     # The number of distinct states a neighborhood can be in.
-    NUM_STATES = 2**NBHDSIZE
+    NUM_STATES = CELL_STATES**NBHDSIZE
     # The number of possible rules:
-    NUM_RULES = 2**NUM_STATES
-    
-    #lists for storing the state of the system at three differnt time steps.
-    past = [];
-    present = [];
-    future = [];
-    
-    # Rule stored a an integer. This will get parsed into a lookup table
-    rule = 0
+    NUM_RULES = NUM_STATES**NUM_STATES
     
     def __init__(self,s,r):
+        #lists for storing the state of the system at three differnt time steps.
         self.past = [0 for i in range(0,s)]
         self.present = list(self.past)
         self.future = list(self.present)
+        # The number of cells in our automaton
         self.size = s
+        # Rule stored a an integer. This will get parsed into a lookup table
 	self.rule = r%self.NUM_RULES
+        # The rule transformed into a lookup table
         self.ruleArray = self.parseRule(r)
         
     # Change the rule
@@ -42,7 +38,7 @@ class Automata1D:
         nbrs = self.Neighbors(n)
         state = 0
         for i in range(0,len(nbrs)):
-            state += (2**i)*self.present[nbrs[i]]
+            state += (self.CELL_STATES**i)*self.present[nbrs[i]]
         return self.ruleArray[state]
 
     # Create a lookup table based on rule
@@ -51,10 +47,10 @@ class Automata1D:
         ret = [0 for i in range(0, self.NUM_STATES)]
         i = 0
         while(y>0):
-            ret[i] = y%2
+            ret[i] = y%self.CELL_STATES
             i = i + 1
-            y = y - y%2
-            y = y/2
+            y = y - y%self.CELL_STATES
+            y = y/self.CELL_STATES
         return ret
     
     # Update the automaton by one time step.
