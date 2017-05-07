@@ -1,5 +1,5 @@
 
-import random
+import random, copy
 
 # Implement a 1 dimensional cellular automaton
 class Automata1D:
@@ -90,8 +90,8 @@ class Automata2D:
         self.max_rule = self.cell_states**self.num_states
         #lists for storing the state of the system at three differnt time steps.
         self.past = [[0 for i in range(0,s)] for j in range(0,s)]
-        self.present = list(self.past)
-        self.future = list(self.present)
+        self.present = [[0 for i in range(0,s)] for j in range(0,s)]
+        self.future = [[0 for i in range(0,s)] for j in range(0,s)]
         # The number of cells in one row of our automaton
         self.size = s
         # Rule stored a an integer. This will get parsed into a lookup table
@@ -106,7 +106,7 @@ class Automata2D:
     
     # Get the neighborhood of a cell as a list. Note that cell neighborhoods wrap (the first and last cells are neighbors).
     def Neighbors(self,x,y):
-        return [[(x-1)%self.size, (y-1)%self.size],[(x-1)%self.size, y%self.size],[(x-1)%self.size, (y+1)%self.size],[x%self.size, (y-1)%self.size],[x%self.size, y%self.size],[x%self.size, (y+1)%self.size],[(x+1)%self.size, (y-1)%self.size],[(x+1)%self.size, y%self.size],[(x+1)%self.size, (y+1)%self.size]]
+        return [[(x-1 + self.size)%self.size, (y-1 + self.size)%self.size],[(x-1 + self.size)%self.size, y%self.size],[(x-1 + self.size)%self.size, (y+1)%self.size],[x%self.size, (y-1 + self.size)%self.size],[x%self.size, y%self.size],[x%self.size, (y+1)%self.size],[(x+1)%self.size, (y-1 + self.size)%self.size],[(x+1)%self.size, y%self.size],[(x+1)%self.size, (y+1)%self.size]]
         
     # Given the state of a cell and it's neighbors, look up the updated state for the cell.
     def apply_rule(self,x,y):
@@ -133,8 +133,8 @@ class Automata2D:
         for i in range(0,self.size):
             for j in range(0,self.size):
                 self.future[i][j] = self.apply_rule(i,j)
-        self.past = list(self.present)
-        self.present = list(self.future)
+        self.past = copy.deepcopy(self.present)
+        self.present = copy.deepcopy(self.future)
         
     # Put a living cell at index n.
     def populate(self,x,y):

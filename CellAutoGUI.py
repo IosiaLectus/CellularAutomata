@@ -15,9 +15,21 @@ clock = pygame.time.Clock()
 
 WIDTH = 1440
 HEIGHT = 810
-SIZE = 20
+SIZE = 60
 RULE = 251043649666805698923307029
-STATES = 5
+STATES = 2
+#Special rules
+SPECIAL1 = 115792089237316195423570985008687907853610267032561502502939405359422902370582
+# Rules that produce behaviour similar to Conway's game of life
+LIFE_LIKE1 = 3121748551042842093571244711680280772127638873342896181933539037900840921746291282334660294445170887313256105169567155377323718410239403643922560
+LIFE_LIKE2 = 3121796387206642884643857416353388816364758858874716286199733047244606563193329744673035888249711427712341048321888349917378690566361405647808640
+LIFE_LIKE3 = 205454759090497442639052309945232436214865822284380363200347133833515823847409191219264074201015001590380158520753898239949933374880133468736771876992
+LIFE_LIKE4 = 3121748550316003369275635227966723160929773800693073915431708268582463553108296554833454127312789959259510100096341992684407471235049015936947816
+LIFE_LIKE5 = 3121796386479804160348247932600429198970499307010478992561837746418013872513971932782371638727206770958880840759000767848926760520120736189284352
+LIFE_LIKE6 = 726838724464839811763263258735123865184586998611241671908905457650522586198267251210724490087484537107000710513277144975870888020699264
+# Haven't yet succesfully identified the rule for Conway's game of life
+CONWAYS_LIFE = 47634829485252037513200973884082471888288955642325528262910887637847274372981720534370017768342996036219492316860704401273651054628223608960
+RULE30 = 30
 
 COLORS = [BLACK,WHITE,RED,GREEN,BLUE]
 
@@ -117,6 +129,8 @@ def run_2DAutomata(screen, size, rule, n_states=2):
 
     # Create the cellular automaton object
     Aut = Automata2D(size,rule, n_states)
+    # Populate randomly
+    Aut.populateRandom(750)
     # Given the screen size and the size of the automaton, decide the size of each cell in pixels.
     dt = min(WIDTH/Aut.size, 0.85*HEIGHT/Aut.size)
     # Create a live cell in the center
@@ -146,6 +160,10 @@ def run_2DAutomata(screen, size, rule, n_states=2):
     menu_button = button_font.render("Menu",True,WHITE,BLACK)
     menu_button_rect = menu_button.get_rect()
     menu_button_rect.topleft = (0.55 * WIDTH, 0.88 * HEIGHT)
+
+    step_button = button_font.render("Step",True,WHITE,BLACK)
+    step_button_rect = step_button.get_rect()
+    step_button_rect.topleft = (0.75 * WIDTH, 0.88 * HEIGHT)
     
     # change the caption
     caption = '2-Dimensional Cellular Automaton: Rule %u' %(rule)
@@ -153,7 +171,7 @@ def run_2DAutomata(screen, size, rule, n_states=2):
 
     # Setup the loop
     should_continue = True  
-    running = True  
+    running = False  
     while should_continue:
         # Get events and respond accordingly
         for event in pygame.event.get():
@@ -172,6 +190,8 @@ def run_2DAutomata(screen, size, rule, n_states=2):
                     running = not running
                 elif clear_button_rect.collidepoint(event.pos):
                     Aut = Automata2D(size,rule, n_states)
+                elif step_button_rect.collidepoint(event.pos) and not running:
+                    Aut.step()
                 elif menu_button_rect.collidepoint(event.pos):
                     return
                 # Iterate through the states of a cell if it is clicked while not running
@@ -197,6 +217,8 @@ def run_2DAutomata(screen, size, rule, n_states=2):
         screen.blit(start_stop_button, start_stop_button_rect)
         screen.blit(clear_button, clear_button_rect)
         screen.blit(menu_button, menu_button_rect)
+        screen.blit(step_button, step_button_rect)
+
 
 	# Update display and increment the clock
         pygame.display.update()
@@ -215,9 +237,9 @@ def display_menu(screen):
     cell_at_twod_button_rect = cell_at_twod_button.get_rect()
 
     w_button = (WIDTH - cell_at_oned_button_rect.width)/2
-    h_button = (HEIGHT - cell_at_oned_button_rect.height - cell_at_twod_button_rect.height-2)/3
+    h_button = (HEIGHT - cell_at_oned_button_rect.height - cell_at_twod_button_rect.height)/3
     cell_at_oned_button_rect.topleft = (w_button, h_button)
-    cell_at_oned_button_rect.topleft = (w_button, 2*h_button + cell_at_oned_button_rect.height + 1)
+    cell_at_twod_button_rect.topleft = (w_button, 2*h_button + cell_at_oned_button_rect.height)
 
     # Setup the loop
     should_continue = True  
@@ -230,15 +252,15 @@ def display_menu(screen):
             elif event.type == KEYUP:
                 if event.key == K_a:
                     # Run a 1-d cellular automaton
-                    run_1DAutomata(screen, SIZE, RULE, STATES)
+                    run_1DAutomata(screen, SIZE, RULE30, STATES)
 
             elif event.type == MOUSEBUTTONUP:
                 if cell_at_oned_button_rect.collidepoint(event.pos):
                     # Run a 1-d cellular automaton
-                    run_1DAutomata(screen, SIZE, RULE, STATES)
+                    run_1DAutomata(screen, SIZE, RULE30, STATES)
                 elif cell_at_twod_button_rect.collidepoint(event.pos):
                     # Run a 2-d cellular automaton
-                    run_2DAutomata(screen, SIZE, RULE, STATES)
+                    run_2DAutomata(screen, SIZE, CONWAYS_LIFE, STATES)
         #Fill screen, draw button
         screen.fill(LIGHT_GRAY)
         screen.blit(cell_at_oned_button, cell_at_oned_button_rect)
