@@ -21,9 +21,7 @@ def FindConwaysLife():
 
         if me==0 and num_nbrs==3:
             ruleArray[s] = 1
-        elif me==1 and num_nbrs == 3:
-            ruleArray[s] = 1
-        elif me==1 and num_nbrs == 4:
+        elif me==1 and (num_nbrs == 3 or num_nbrs == 4):
             ruleArray[s] = 1
         else:
             ruleArray[s] = 0

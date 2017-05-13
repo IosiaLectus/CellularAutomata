@@ -3,6 +3,7 @@
 import pygame, sys
 from CellularAutomata import Automata1D, Automata2D
 from pygame.locals import *
+from copy import copy
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -15,25 +16,118 @@ clock = pygame.time.Clock()
 
 WIDTH = 1440
 HEIGHT = 810
-SIZE = 60
-RULE = 251043649666805698923307029
-STATES = 2
-#Special rules
+
+# Special rules
 SPECIAL1 = 115792089237316195423570985008687907853610267032561502502939405359422902370582
+# Rules that roughly fill the screen with random looking patterns
+NOISE_LIKE1 = 3121796387206642884643857416353388816364758858874716286199733047244606563193329744673035888249711427712341048321888349917378690566361405647808640
+NOISE_LIKE2 = 3121748550316003369275635227966723160929773800693073915431708268582463553108296554833454127312789959259510100096341992684407471235049015936947816
 # Rules that produce behaviour similar to Conway's game of life
-LIFE_LIKE1 = 3121748551042842093571244711680280772127638873342896181933539037900840921746291282334660294445170887313256105169567155377323718410239403643922560
-LIFE_LIKE2 = 3121796387206642884643857416353388816364758858874716286199733047244606563193329744673035888249711427712341048321888349917378690566361405647808640
-LIFE_LIKE3 = 205454759090497442639052309945232436214865822284380363200347133833515823847409191219264074201015001590380158520753898239949933374880133468736771876992
-LIFE_LIKE4 = 3121748550316003369275635227966723160929773800693073915431708268582463553108296554833454127312789959259510100096341992684407471235049015936947816
-LIFE_LIKE5 = 3121796386479804160348247932600429198970499307010478992561837746418013872513971932782371638727206770958880840759000767848926760520120736189284352
-LIFE_LIKE6 = 726838724464839811763263258735123865184586998611241671908905457650522586198267251210724490087484537107000710513277144975870888020699264
-# Haven't yet succesfully identified the rule for Conway's game of life
+LIFE_LIKE1 = 205454759090497442639052309945232436214865822284380363200347133833515823847409191219264074201015001590380158520753898239949933374880133468736771876992
+LIFE_LIKE2 = 726838724464839811763263258735123865184586998611241671908905457650522586198267251210724490087484537107000710513277144975870888020699264
+# High Life
+HIGH_LIFE = 17906349751691750481340204495492854274670584542487789885803402073029455817577464160291999794337574027107342398164249071406956271440323154418254506112
+# Life 34
+LIFE34 = 3121796387206642884643857416353388816364758858874716286199733047244606563193329744673035888249711427712341048321888349917378690566361405647808640
+# Conway's game of life
 CONWAYS_LIFE = 47634829485252037513200973884082471888288955642325528262910887637847274372981720534370017768342996036219492316860704401273651054628223608960
-RULE30 = 30
+
+#Set 2d default settings
+rule2d = CONWAYS_LIFE
+n_states2d = 2
+size2d = 60
+
+#Set 1d default settings
+rule1d = 30
+n_states1d = 2
+size1d = 120
 
 COLORS = [BLACK,WHITE,RED,GREEN,BLUE]
 
 FPS = 5
+
+# Get an integer as input from the user
+def getInt(screen, msg):
+
+    ret = 0
+    retstring = '%u' %(ret)
+
+    display_font = pygame.font.SysFont('FreeSans.otf',45)
+
+    # Make the displays
+    msg_display = display_font.render(msg,True,WHITE,BLACK)
+    msg_display_rect = msg_display.get_rect()
+
+    int_display = display_font.render(retstring,True,WHITE,BLACK)
+    int_display_rect = int_display.get_rect()
+
+    w_button = (WIDTH - msg_display_rect.width)/2
+    h_button = (HEIGHT - msg_display_rect.height - int_display_rect.height)/3
+    msg_display_rect.topleft = (w_button, h_button)
+    int_display_rect.topleft = (w_button, 2*h_button + msg_display_rect.height)
+
+    # Setup the loop
+    should_continue = True  
+    while should_continue:
+        # Get events and respond accordingly
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+            # Get user input and update output accordingly
+            elif event.type == KEYUP:
+                if event.key == K_RETURN:
+                    # Run a 1-d cellular automaton
+                    return ret
+                if event.key == K_0:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '0'
+                if event.key == K_1:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '1'
+                if event.key == K_2:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '2'
+                if event.key == K_3:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '3'
+                if event.key == K_4:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '4'
+                if event.key == K_5:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '5'
+                if event.key == K_6:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '6'
+                if event.key == K_7:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '7'
+                if event.key == K_8:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '8'
+                if event.key == K_9:
+                    # Run a 1-d cellular automaton
+                    retstring = retstring + '9'
+
+        #Update variables
+        ret = int(retstring)
+        retstring = '%u' %(ret)
+
+        int_display = display_font.render(retstring,True,WHITE,BLACK)
+        int_display_rect = int_display.get_rect()
+        int_display_rect.topleft = (w_button, 2*h_button + msg_display_rect.height)
+
+        #Fill screen, draw displays
+        screen.fill(LIGHT_GRAY)
+
+        screen.blit(msg_display, msg_display_rect)
+        screen.blit(int_display, int_display_rect)
+
+	# Update display and increment the clock
+        pygame.display.update()
+        clock.tick(FPS)
 
 #Run a 1-d cellular automaton with 'size' cells and rule 'rule'.
 def run_1DAutomata(screen, size, rule, n_states=2):
@@ -41,7 +135,7 @@ def run_1DAutomata(screen, size, rule, n_states=2):
     button_font = pygame.font.SysFont('FreeSans.otf',25)
 
     # Create the cellular automaton object
-    Aut = Automata1D(size,rule, n_states)
+    Aut = Automata1D(size, rule, n_states)
     # Given the screen size and the size of the automaton, decide the size of each cell in pixels.
     dt = WIDTH/Aut.size
     # Create a live cell in the center
@@ -64,6 +158,10 @@ def run_1DAutomata(screen, size, rule, n_states=2):
     menu_button = button_font.render("Menu",True,WHITE,BLACK)
     menu_button_rect = menu_button.get_rect()
     menu_button_rect.topleft = (0.55 * WIDTH, 0.88 * HEIGHT)
+
+    step_button = button_font.render("Step",True,WHITE,BLACK)
+    step_button_rect = step_button.get_rect()
+    step_button_rect.topleft = (0.75 * WIDTH, 0.88 * HEIGHT)
     
     # change the caption
     caption = '1-Dimensional Cellular Automaton: Rule %u' %(rule)
@@ -73,6 +171,7 @@ def run_1DAutomata(screen, size, rule, n_states=2):
     should_continue = True  
     running = True  
     while should_continue:
+        step_now = running
         # Get events and respond accordingly
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -96,9 +195,11 @@ def run_1DAutomata(screen, size, rule, n_states=2):
                     Aut.populate(int(size/2))
                     grid = []
                     screen.fill(LIGHT_GRAY)
+                elif step_button_rect.collidepoint(event.pos) and not running:
+                    step_now = True
                 elif menu_button_rect.collidepoint(event.pos):
                     return
-        if running:
+        if step_now:
             # Get the list of current cells, and append them at the bottom of our grid
             grid.append(list(Aut.present))
             # If the grid is too tall to fit in the available space, cut of the topmost layer of cells
@@ -117,6 +218,7 @@ def run_1DAutomata(screen, size, rule, n_states=2):
         screen.blit(start_stop_button, start_stop_button_rect)
         screen.blit(clear_button, clear_button_rect)
         screen.blit(menu_button, menu_button_rect)
+        screen.blit(step_button, step_button_rect)
 
 	# Update display and increment the clock
         pygame.display.update()
@@ -224,6 +326,82 @@ def run_2DAutomata(screen, size, rule, n_states=2):
         pygame.display.update()
         clock.tick(FPS)
 
+#Change the settings for the cellular automaton
+def settings(screen):
+
+    button_font = pygame.font.SysFont('FreeSans.otf',25)
+
+    # Make some buttons
+    rule2d_button = button_font.render("Change rule for 2d automaton",True,WHITE,BLACK)
+    rule2d_button_rect = rule2d_button.get_rect()
+
+    rule1d_button = button_font.render("Change rule for 1d automaton",True,WHITE,BLACK)
+    rule1d_button_rect = rule1d_button.get_rect()
+
+    size1d_button = button_font.render("Set 1d automaton size",True,WHITE,BLACK)
+    size1d_button_rect = size1d_button.get_rect()
+
+    size2d_button = button_font.render("Set 2d automaton size",True,WHITE,BLACK)
+    size2d_button_rect = size2d_button.get_rect()
+
+    back_button = button_font.render("Back to menu",True,WHITE,BLACK)
+    back_button_rect = back_button.get_rect()
+
+    w_button = (WIDTH - rule2d_button_rect.width)/2
+    h_button = (HEIGHT - rule2d_button_rect.height - rule1d_button_rect.height - size1d_button_rect.height - size2d_button_rect.height - back_button_rect.height)/6
+    rule1d_button_rect.topleft = (w_button, h_button)
+    rule2d_button_rect.topleft = (w_button, 2*h_button + rule2d_button_rect.height)
+    size1d_button_rect.topleft = (w_button, 3*h_button + rule2d_button_rect.height + rule1d_button_rect.height)
+    size2d_button_rect.topleft = (w_button, 4*h_button + rule2d_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height)
+    back_button_rect.topleft = (w_button, 5*h_button + rule2d_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height + size2d_button_rect.height)
+
+    # Setup the loop
+    should_continue = True  
+    while should_continue:
+        # Get events and respond accordingly
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+            elif event.type == KEYUP:
+                if event.key == K_m:
+                    return
+
+            elif event.type == MOUSEBUTTONUP:
+                if back_button_rect.collidepoint(event.pos):
+                    # Go back to the main menu
+                    return
+                elif rule1d_button_rect.collidepoint(event.pos):
+                    # update rule1d with user input
+                    global rule1d
+                    rule1d = getInt(screen,'Enter new rule:')
+                elif rule2d_button_rect.collidepoint(event.pos):
+                    # update rule1d with user input
+                    global rule2d
+                    rule2d = getInt(screen,'Enter new rule:')
+                elif size1d_button_rect.collidepoint(event.pos):
+                    # update rule1d with user input
+                    global size1d
+                    size1d = getInt(screen,'Enter size:')
+                elif size2d_button_rect.collidepoint(event.pos):
+                    # update rule1d with user input
+                    global size2d
+                    size2d = getInt(screen,'Enter size:')
+
+        #Fill screen, draw button
+        screen.fill(LIGHT_GRAY)
+
+        screen.blit(rule2d_button, rule2d_button_rect)
+        screen.blit(rule1d_button, rule1d_button_rect)
+        screen.blit(size1d_button, size1d_button_rect)
+        screen.blit(size2d_button, size2d_button_rect)
+        screen.blit(back_button, back_button_rect)
+
+	# Update display and increment the clock
+        pygame.display.update()
+        clock.tick(FPS)
+
 #Display a menu (not yet implemented).
 def display_menu(screen):
 
@@ -236,10 +414,14 @@ def display_menu(screen):
     cell_at_twod_button = button_font.render("Start 2-d cellular automaton",True,WHITE,BLACK)
     cell_at_twod_button_rect = cell_at_twod_button.get_rect()
 
+    settings_button = button_font.render("Settings",True,WHITE,BLACK)
+    settings_button_rect = settings_button.get_rect()
+
     w_button = (WIDTH - cell_at_oned_button_rect.width)/2
-    h_button = (HEIGHT - cell_at_oned_button_rect.height - cell_at_twod_button_rect.height)/3
+    h_button = (HEIGHT - cell_at_oned_button_rect.height - cell_at_twod_button_rect.height - settings_button_rect.height)/4
     cell_at_oned_button_rect.topleft = (w_button, h_button)
     cell_at_twod_button_rect.topleft = (w_button, 2*h_button + cell_at_oned_button_rect.height)
+    settings_button_rect.topleft = (w_button, 3*h_button + cell_at_oned_button_rect.height + cell_at_twod_button_rect.height)
 
     # Setup the loop
     should_continue = True  
@@ -252,19 +434,23 @@ def display_menu(screen):
             elif event.type == KEYUP:
                 if event.key == K_a:
                     # Run a 1-d cellular automaton
-                    run_1DAutomata(screen, SIZE, RULE30, STATES)
+                    run_1DAutomata(screen, size1d, rule1d, n_states1d)
 
             elif event.type == MOUSEBUTTONUP:
                 if cell_at_oned_button_rect.collidepoint(event.pos):
                     # Run a 1-d cellular automaton
-                    run_1DAutomata(screen, SIZE, RULE30, STATES)
+                    run_1DAutomata(screen, size1d, rule1d, n_states1d)
                 elif cell_at_twod_button_rect.collidepoint(event.pos):
                     # Run a 2-d cellular automaton
-                    run_2DAutomata(screen, SIZE, CONWAYS_LIFE, STATES)
+                    run_2DAutomata(screen, size2d, rule2d, n_states2d)
+                elif settings_button_rect.collidepoint(event.pos):
+                    # Run display settings screen
+                    settings(screen)
         #Fill screen, draw button
         screen.fill(LIGHT_GRAY)
         screen.blit(cell_at_oned_button, cell_at_oned_button_rect)
         screen.blit(cell_at_twod_button, cell_at_twod_button_rect)
+        screen.blit(settings_button, settings_button_rect)
 
 	# Update display and increment the clock
         pygame.display.update()
