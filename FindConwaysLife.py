@@ -1,7 +1,7 @@
 # Build the cellular automaton rule corresponding to Conway's game of life
 
-# First, build the rule array
-def FindConwaysLife():
+# Convert rule from Golly/MCell notation to Wolfram code. 
+def ConvertRule(birth, survival):
     ret = 0
     ruleArray = [0 for i in range(0,2**9)]
     stateArray = [0 for i in range(0,9)] 
@@ -19,9 +19,9 @@ def FindConwaysLife():
         for i in range(0,len(stateArray)):
             num_nbrs = num_nbrs + stateArray[i]
 
-        if me==0 and num_nbrs==3:
+        if me==0 and (num_nbrs in birth):
             ruleArray[s] = 1
-        elif me==1 and (num_nbrs == 3 or num_nbrs == 4):
+        elif me==1 and ((num_nbrs - 1) in survival):
             ruleArray[s] = 1
         else:
             ruleArray[s] = 0
@@ -31,9 +31,18 @@ def FindConwaysLife():
         ret += (ruleArray[s])*(2**s)
     return ret
 
+# Find the game of life
+def FindConwaysLife():
+    birth = [3]
+    survival = [2,3]
+    return ConvertRule(birth, survival)
+
 def Main():
+    birth = [2,3]
+    survival = [2,3]
+    x = ConvertRule(birth, survival)
     print
-    print FindConwaysLife()
+    print x
     print
     return
     

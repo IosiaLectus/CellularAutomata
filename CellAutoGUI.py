@@ -4,6 +4,7 @@ import pygame, sys
 from CellularAutomata import Automata1D, Automata2D
 from pygame.locals import *
 from copy import copy
+from FindConwaysLife import *
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -14,23 +15,11 @@ BLUE = (0,0,255)
 
 clock = pygame.time.Clock()
 
+# Screen width and height
 WIDTH = 1440
 HEIGHT = 810
-
-# Special rules
-SPECIAL1 = 115792089237316195423570985008687907853610267032561502502939405359422902370582
-# Rules that roughly fill the screen with random looking patterns
-NOISE_LIKE1 = 3121796387206642884643857416353388816364758858874716286199733047244606563193329744673035888249711427712341048321888349917378690566361405647808640
-NOISE_LIKE2 = 3121748550316003369275635227966723160929773800693073915431708268582463553108296554833454127312789959259510100096341992684407471235049015936947816
-# Rules that produce behaviour similar to Conway's game of life
-LIFE_LIKE1 = 205454759090497442639052309945232436214865822284380363200347133833515823847409191219264074201015001590380158520753898239949933374880133468736771876992
-LIFE_LIKE2 = 726838724464839811763263258735123865184586998611241671908905457650522586198267251210724490087484537107000710513277144975870888020699264
-# High Life
-HIGH_LIFE = 17906349751691750481340204495492854274670584542487789885803402073029455817577464160291999794337574027107342398164249071406956271440323154418254506112
-# Life 34
-LIFE34 = 3121796387206642884643857416353388816364758858874716286199733047244606563193329744673035888249711427712341048321888349917378690566361405647808640
 # Conway's game of life
-CONWAYS_LIFE = 47634829485252037513200973884082471888288955642325528262910887637847274372981720534370017768342996036219492316860704401273651054628223608960
+CONWAYS_LIFE = FindConwaysLife()
 
 #Set 2d default settings
 rule2d = CONWAYS_LIFE
@@ -332,8 +321,11 @@ def settings(screen):
     button_font = pygame.font.SysFont('FreeSans.otf',25)
 
     # Make some buttons
-    rule2d_button = button_font.render("Change rule for 2d automaton",True,WHITE,BLACK)
+    rule2d_button = button_font.render("Change rule for 2d automaton (Wolfram Code)",True,WHITE,BLACK)
     rule2d_button_rect = rule2d_button.get_rect()
+
+    rule2db_button = button_font.render("Change rule for 2d automaton (MCell)",True,WHITE,BLACK)
+    rule2db_button_rect = rule2db_button.get_rect()
 
     rule1d_button = button_font.render("Change rule for 1d automaton",True,WHITE,BLACK)
     rule1d_button_rect = rule1d_button.get_rect()
@@ -348,12 +340,13 @@ def settings(screen):
     back_button_rect = back_button.get_rect()
 
     w_button = (WIDTH - rule2d_button_rect.width)/2
-    h_button = (HEIGHT - rule2d_button_rect.height - rule1d_button_rect.height - size1d_button_rect.height - size2d_button_rect.height - back_button_rect.height)/6
+    h_button = (HEIGHT - rule2d_button_rect.height - rule1d_button_rect.height - size1d_button_rect.height - size2d_button_rect.height - rule2db_button_rect.height - back_button_rect.height)/7
     rule1d_button_rect.topleft = (w_button, h_button)
     rule2d_button_rect.topleft = (w_button, 2*h_button + rule2d_button_rect.height)
-    size1d_button_rect.topleft = (w_button, 3*h_button + rule2d_button_rect.height + rule1d_button_rect.height)
-    size2d_button_rect.topleft = (w_button, 4*h_button + rule2d_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height)
-    back_button_rect.topleft = (w_button, 5*h_button + rule2d_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height + size2d_button_rect.height)
+    rule2db_button_rect.topleft = (w_button, 3*h_button + rule2d_button_rect.height + rule1d_button_rect.height)
+    size1d_button_rect.topleft = (w_button, 4*h_button + rule2d_button_rect.height + rule2db_button_rect.height + rule1d_button_rect.height)
+    size2d_button_rect.topleft = (w_button, 5*h_button + rule2d_button_rect.height + rule2db_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height)
+    back_button_rect.topleft = (w_button, 6*h_button + rule2d_button_rect.height + rule2db_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height + size2d_button_rect.height)
 
     # Setup the loop
     should_continue = True  
@@ -380,6 +373,29 @@ def settings(screen):
                     # update rule1d with user input
                     global rule2d
                     rule2d = getInt(screen,'Enter new rule:')
+                elif rule2db_button_rect.collidepoint(event.pos):
+                    # update rule1d with user input
+                    global rule2d
+                    birth_int = getInt(screen,'Enter birth string:')
+                    survival_int = getInt(screen,'Enter survival string:')
+
+                    birth = []
+                    # Get a list of birth states
+                    while birth_int > 0:
+                        app = birth_int % 10
+                        birth.append(app)
+                        birth_int = birth_int - app
+                        birth_int = birth_int/10
+
+                    survival = []
+                    # Get a list of survival states
+                    while survival_int > 0:
+                        app = survival_int % 10
+                        survival.append(app)
+                        survival_int = survival_int - app
+                        survival_int = survival_int/10
+
+                    rule2d = ConvertRule(birth, survival)
                 elif size1d_button_rect.collidepoint(event.pos):
                     # update rule1d with user input
                     global size1d
@@ -393,6 +409,7 @@ def settings(screen):
         screen.fill(LIGHT_GRAY)
 
         screen.blit(rule2d_button, rule2d_button_rect)
+        screen.blit(rule2db_button, rule2db_button_rect)
         screen.blit(rule1d_button, rule1d_button_rect)
         screen.blit(size1d_button, size1d_button_rect)
         screen.blit(size2d_button, size2d_button_rect)
