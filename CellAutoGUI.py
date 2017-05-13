@@ -118,6 +118,37 @@ def getInt(screen, msg):
         pygame.display.update()
         clock.tick(FPS)
 
+# equally space buttons
+def layout_buttons(buttons, hmin, hmax, wmin, wmax, horizontal=False):
+
+    # total number of buttons
+    n_buttons = len(buttons)
+    # height and width spacings
+    dw = wmax - wmin
+    dh = hmax - hmin
+    # list of sizes of the buttons the buttons
+    wlist = [buttons[i].rect.width for i in range(0,n_buttons)]
+    hlist = [buttons[i].rect.height for i in range(0,n_buttons)]
+    # list of coords for the buttons
+    xlist = [0 for i in range(0,n_buttons)]
+    ylist = [0 for i in range(0,n_buttons)]
+
+    wspace = (dw - sum(wlist))/(n_buttons - 1)
+    wspace = (dh - sum(hlist))/(n_buttons - 1)
+
+    
+
+    if horizontal:
+        for i in range(0, n_buttons):
+            ylist[i] = (dh - hlist[i])/2
+            xlist[i] = hspace*(i+1) + sum(hlist[0:i])
+            buttons[i].rect.topleft = (xlist[i], ylist[i])
+    else:
+        for i in range(0, n_buttons):
+            xlist[i] = (dw - wlist[i])/2
+            ylist[i] = wspace*(i+1) + sum(wlist[0:i])
+            buttons[i].rect.topleft = (xlist[i], ylist[i])
+
 #Run a 1-d cellular automaton with 'size' cells and rule 'rule'.
 def run_1DAutomata(screen, size, rule, n_states=2):
 
@@ -419,7 +450,7 @@ def settings(screen):
         pygame.display.update()
         clock.tick(FPS)
 
-#Display a menu (not yet implemented).
+# Display a menu
 def display_menu(screen):
 
     button_font = pygame.font.SysFont('FreeSans.otf',45)
