@@ -6,7 +6,7 @@ def ConvertRule(birth, survival):
     ruleArray = [0 for i in range(0,2**9)]
     stateArray = [0 for i in range(0,9)] 
 
-    # For every possible state of a neighborhood, read off the successive state according to the rules of Conway's life and store the results in a lookup table
+    # For every possible state of a neighborhood, read off the successive state according to the MCell and store the results in a lookup table
     for s in range(0,len(ruleArray)):
         r = int(s)
         for i in range(0,len(stateArray)):
@@ -37,10 +37,50 @@ def FindConwaysLife():
     survival = [2,3]
     return ConvertRule(birth, survival)
 
+# Find rules where the updated state of a cell is an affine function of the states of the cell's neighbors (and the cell's own state). This seems to take a very long time to run.
+def AffineRule(n_states, n_nbrs, m, b):
+    # Number of possible states of a neighborhood:
+    n_nbhd_states = n_states**n_nbrs
+
+    # m is interpreted as a base n_states integer, which in turn is interpreted as a vector base n_states digits which will be used as the multiplicative parameters in the affine function
+    mm = int(m)
+    m_list = [0 for i in range(0, n_nbrs)]
+    for i in range(0, n_nbrs):
+        x = mm % n_states
+        m_list[i] = x
+        mm = (mm - x)/n_states
+
+    # Now we will write out the rule array
+    rule_array = [0 for i in range(0, n_nbhd_states)]
+    state_array = [0 for i in range(0,n_nbrs)]
+
+    # For every possible state of a neighborhood, read off the successive state according to the affine rule and store the results in a lookup table
+    for s in range(0,len(rule_array)):
+        r = int(s)
+        for i in range(0,len(state_array)):
+            state_array[i] = r%n_states
+            r = r-state_array[i]
+            r = r/n_states
+        # Compute the affine function
+        rule_array[s] = b % n_states
+        for i in range(0, n_nbrs):
+            rule_array[s] = (rule_array[s] + m_list[i]*state_array[i]) % n_states
+
+    ret = 0
+    #Convert the lookup table into a number
+    for s in range(0,len(rule_array)):
+        ret += (rule_array[s])*(n_states**s)
+    return ret
+
 def Main():
-    birth = [2,3]
-    survival = [2,3]
-    x = ConvertRule(birth, survival)
+    n_states = 5
+    n_nbrs = 9
+    m_list = [2, 4, 3, 4, 0, 1, 3, 3, 4] 
+    b = 0
+    m = int(b)
+    for i in range(0,len(m_list)):
+        m = m + m_list[i] * (n_states**i)
+    x = AffineRule(n_states, n_nbrs, m, b)
     print
     print x
     print

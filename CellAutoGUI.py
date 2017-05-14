@@ -69,6 +69,10 @@ def getInt(screen, msg):
                 if event.key == K_RETURN:
                     # Run a 1-d cellular automaton
                     return ret
+                if event.key == K_BACKSPACE:
+                    # Run a 1-d cellular automaton
+                    x = (ret - (ret%10))/10
+                    retstring = '%u' %(x)
                 if event.key == K_0:
                     # Run a 1-d cellular automaton
                     retstring = retstring + '0'
@@ -118,7 +122,7 @@ def getInt(screen, msg):
         pygame.display.update()
         clock.tick(FPS)
 
-# equally space buttons
+# Equally space buttons within some rectangle. Currently not working
 def layout_buttons(buttons, hmin, hmax, wmin, wmax, horizontal=False):
 
     # total number of buttons
@@ -127,8 +131,8 @@ def layout_buttons(buttons, hmin, hmax, wmin, wmax, horizontal=False):
     dw = wmax - wmin
     dh = hmax - hmin
     # list of sizes of the buttons the buttons
-    wlist = [buttons[i].rect.width for i in range(0,n_buttons)]
-    hlist = [buttons[i].rect.height for i in range(0,n_buttons)]
+    wlist = [buttons[i].width for i in range(0,n_buttons)]
+    hlist = [buttons[i].height for i in range(0,n_buttons)]
     # list of coords for the buttons
     xlist = [0 for i in range(0,n_buttons)]
     ylist = [0 for i in range(0,n_buttons)]
@@ -136,18 +140,16 @@ def layout_buttons(buttons, hmin, hmax, wmin, wmax, horizontal=False):
     wspace = (dw - sum(wlist))/(n_buttons - 1)
     wspace = (dh - sum(hlist))/(n_buttons - 1)
 
-    
-
     if horizontal:
         for i in range(0, n_buttons):
             ylist[i] = (dh - hlist[i])/2
             xlist[i] = hspace*(i+1) + sum(hlist[0:i])
-            buttons[i].rect.topleft = (xlist[i], ylist[i])
+            buttons[i].topleft = (xlist[i], ylist[i])
     else:
         for i in range(0, n_buttons):
             xlist[i] = (dw - wlist[i])/2
             ylist[i] = wspace*(i+1) + sum(wlist[0:i])
-            buttons[i].rect.topleft = (xlist[i], ylist[i])
+            buttons[i].topleft = (xlist[i], ylist[i])
 
 #Run a 1-d cellular automaton with 'size' cells and rule 'rule'.
 def run_1DAutomata(screen, size, rule, n_states=2):
@@ -367,17 +369,25 @@ def settings(screen):
     size2d_button = button_font.render("Set 2d automaton size",True,WHITE,BLACK)
     size2d_button_rect = size2d_button.get_rect()
 
+    num_states_1d_button = button_font.render("Set number of 1d automaton states",True,WHITE,BLACK)
+    num_states_1d_button_rect = num_states_1d_button.get_rect()
+
+    num_states_2d_button = button_font.render("Set number of 2d automaton states",True,WHITE,BLACK)
+    num_states_2d_button_rect = num_states_2d_button.get_rect()
+
     back_button = button_font.render("Back to menu",True,WHITE,BLACK)
     back_button_rect = back_button.get_rect()
 
     w_button = (WIDTH - rule2d_button_rect.width)/2
-    h_button = (HEIGHT - rule2d_button_rect.height - rule1d_button_rect.height - size1d_button_rect.height - size2d_button_rect.height - rule2db_button_rect.height - back_button_rect.height)/7
+    h_button = (HEIGHT - rule2d_button_rect.height - rule1d_button_rect.height - size1d_button_rect.height - size2d_button_rect.height - rule2db_button_rect.height - back_button_rect.height - num_states_2d_button_rect.height - num_states_1d_button_rect.height)/9
     rule1d_button_rect.topleft = (w_button, h_button)
     rule2d_button_rect.topleft = (w_button, 2*h_button + rule2d_button_rect.height)
     rule2db_button_rect.topleft = (w_button, 3*h_button + rule2d_button_rect.height + rule1d_button_rect.height)
     size1d_button_rect.topleft = (w_button, 4*h_button + rule2d_button_rect.height + rule2db_button_rect.height + rule1d_button_rect.height)
     size2d_button_rect.topleft = (w_button, 5*h_button + rule2d_button_rect.height + rule2db_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height)
-    back_button_rect.topleft = (w_button, 6*h_button + rule2d_button_rect.height + rule2db_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height + size2d_button_rect.height)
+    num_states_1d_button_rect.topleft = (w_button, 6*h_button + rule2d_button_rect.height + rule2db_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height + size2d_button_rect.height)
+    num_states_2d_button_rect.topleft = (w_button, 7*h_button + rule2d_button_rect.height + rule2db_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height + size2d_button_rect.height + num_states_1d_button_rect.height)
+    back_button_rect.topleft = (w_button, 8*h_button + rule2d_button_rect.height + rule2db_button_rect.height + rule1d_button_rect.height + size1d_button_rect.height + size2d_button_rect.height + num_states_1d_button_rect.height + num_states_2d_button_rect.height)
 
     # Setup the loop
     should_continue = True  
@@ -401,11 +411,11 @@ def settings(screen):
                     global rule1d
                     rule1d = getInt(screen,'Enter new rule:')
                 elif rule2d_button_rect.collidepoint(event.pos):
-                    # update rule1d with user input
+                    # update rule2d with user input
                     global rule2d
                     rule2d = getInt(screen,'Enter new rule:')
                 elif rule2db_button_rect.collidepoint(event.pos):
-                    # update rule1d with user input
+                    # update rule2d by computing a wolfram code from a MCell style rule
                     global rule2d
                     birth_int = getInt(screen,'Enter birth string:')
                     survival_int = getInt(screen,'Enter survival string:')
@@ -428,13 +438,25 @@ def settings(screen):
 
                     rule2d = ConvertRule(birth, survival)
                 elif size1d_button_rect.collidepoint(event.pos):
-                    # update rule1d with user input
+                    # update size1d with user input
                     global size1d
                     size1d = getInt(screen,'Enter size:')
                 elif size2d_button_rect.collidepoint(event.pos):
-                    # update rule1d with user input
+                    # update size2d with user input
                     global size2d
                     size2d = getInt(screen,'Enter size:')
+                elif num_states_1d_button_rect.collidepoint(event.pos):
+                    # update number of 1d states with user input
+                    global n_states1d
+                    n_states1d = getInt(screen,'Enter an integer between 2 and 5:')
+                    while not (n_states1d >1 and n_states1d<6):
+                        n_states1d = getInt(screen, 'Invalid input, please enter an integer between 1 and 5')
+                elif num_states_2d_button_rect.collidepoint(event.pos):
+                    # update number of 1d states with user input
+                    global n_states2d
+                    n_states2d = getInt(screen,'Enter an integer between 2 and 5:')
+                    while not (n_states2d >1 and n_states2d<6):
+                        n_states2d = getInt(screen, 'Invalid input, please enter an integer between 1 and 5')
 
         #Fill screen, draw button
         screen.fill(LIGHT_GRAY)
@@ -444,6 +466,8 @@ def settings(screen):
         screen.blit(rule1d_button, rule1d_button_rect)
         screen.blit(size1d_button, size1d_button_rect)
         screen.blit(size2d_button, size2d_button_rect)
+        screen.blit(num_states_1d_button, num_states_1d_button_rect)
+        screen.blit(num_states_2d_button, num_states_2d_button_rect)
         screen.blit(back_button, back_button_rect)
 
 	# Update display and increment the clock
@@ -470,6 +494,10 @@ def display_menu(screen):
     cell_at_oned_button_rect.topleft = (w_button, h_button)
     cell_at_twod_button_rect.topleft = (w_button, 2*h_button + cell_at_oned_button_rect.height)
     settings_button_rect.topleft = (w_button, 3*h_button + cell_at_oned_button_rect.height + cell_at_twod_button_rect.height)
+
+    rect_list = [cell_at_oned_button_rect, cell_at_twod_button_rect, settings_button_rect]
+    #layout_buttons(rect_list, 0, HEIGHT, 0, WIDTH)
+    
 
     # Setup the loop
     should_continue = True  
