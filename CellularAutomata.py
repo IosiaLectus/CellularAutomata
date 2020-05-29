@@ -23,16 +23,16 @@ class Automata1D:
 	self.rule = r%self.max_rule
         # The rule transformed into a lookup table
         self.ruleArray = self.parseRule(self.rule)
-        
+
     # Change the rule
     def setRule(self,r):
         self.rule = r%self.max_rule
         self.ruleArray = self.parseRule(r)
-    
+
     # Get the neighborhood of a cell as a list. Note that cell neighborhoods wrap (the first and last cells are neighbors).
     def Neighbors(self,m):
         return [(m-1)%self.size,m%self.size,(m+1)%self.size]
-        
+
     # Given the state of a cell and it's neighbors, look up the updated state for the cell.
     def apply_rule(self,n):
         nbrs = self.Neighbors(n)
@@ -52,24 +52,24 @@ class Automata1D:
             y = y - y%self.cell_states
             y = y/self.cell_states
         return ret
-    
+
     # Update the automaton by one time step.
     def step(self):
         for i in range(0,self.size):
             self.future[i] = self.apply_rule(i)
         self.past = list(self.present)
         self.present = list(self.future)
-        
+
     # Put a living cell at index x, y.
     def populate(self,n):
         self.present[n%self.size] = 1
-        
+
     # Randomly place x living cells within the automaton.
     def populateRandom(self,x):
         for i in range(0,x):
             self.populate(random.randint(0,self.size-1))
-      
-    # Update through t steps      
+
+    # Update through t steps
     def play(self,t):
         for i in range(0,t):
             self.step()
@@ -98,16 +98,16 @@ class Automata2D:
 	self.rule = r%self.max_rule
         # The rule transformed into a lookup table
         self.ruleArray = self.parseRule(self.rule)
-        
+
     # Change the rule
     def setRule(self,r):
         self.rule = r%self.max_rule
         self.ruleArray = self.parseRule(r)
-    
+
     # Get the neighborhood of a cell as a list. Note that cell neighborhoods wrap (the first and last cells are neighbors).
     def Neighbors(self,x,y):
         return [[(x-1 + self.size)%self.size, (y-1 + self.size)%self.size],[(x-1 + self.size)%self.size, y%self.size],[(x-1 + self.size)%self.size, (y+1)%self.size],[x%self.size, (y-1 + self.size)%self.size],[x%self.size, y%self.size],[x%self.size, (y+1)%self.size],[(x+1)%self.size, (y-1 + self.size)%self.size],[(x+1)%self.size, y%self.size],[(x+1)%self.size, (y+1)%self.size]]
-        
+
     # Given the state of a cell and it's neighbors, look up the updated state for the cell.
     def apply_rule(self,x,y):
         nbrs = self.Neighbors(x,y)
@@ -127,7 +127,7 @@ class Automata2D:
             y = y - y%self.cell_states
             y = y/self.cell_states
         return ret
-    
+
     # Update the automaton by one time step.
     def step(self):
         for i in range(0,self.size):
@@ -135,17 +135,17 @@ class Automata2D:
                 self.future[i][j] = self.apply_rule(i,j)
         self.past = copy.deepcopy(self.present)
         self.present = copy.deepcopy(self.future)
-        
+
     # Put a living cell at index n.
     def populate(self,x,y):
         self.present[x%self.size][y%self.size] = 1
-        
+
     # Randomly place x living cells within the automaton.
     def populateRandom(self,x):
         for i in range(0,x):
             self.populate(random.randint(0,self.size-1),random.randint(0,self.size-1))
-      
-    # Update through t steps      
+
+    # Update through t steps
     def play(self,t):
         for i in range(0,t):
             self.step()
@@ -155,6 +155,6 @@ def Main():
     aut.populateRandom(3)
     aut.play(10)
     return
-    
+
 if __name__ == "__main__":
     Main()

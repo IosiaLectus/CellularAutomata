@@ -1,10 +1,10 @@
 # Build the cellular automaton rule corresponding to Conway's game of life
 
-# Convert rule from Golly/MCell notation to Wolfram code. 
+# Convert rule from Golly/MCell notation to Wolfram code.
 def ConvertRule(birth, survival):
     ret = 0
     ruleArray = [0 for i in range(0,2**9)]
-    stateArray = [0 for i in range(0,9)] 
+    stateArray = [0 for i in range(0,9)]
 
     # For every possible state of a neighborhood, read off the successive state according to the MCell and store the results in a lookup table
     for s in range(0,len(ruleArray)):
@@ -73,18 +73,7 @@ def AffineRule(n_states, n_nbrs, m, b):
     return ret
 
 def Main():
-    n_states = 5
-    n_nbrs = 9
-    m_list = [2, 4, 3, 4, 0, 1, 3, 3, 4] 
-    b = 0
-    m = int(b)
-    for i in range(0,len(m_list)):
-        m = m + m_list[i] * (n_states**i)
-    x = AffineRule(n_states, n_nbrs, m, b)
-    print
-    print x
-    print
-    return
-    
+    print(FindConwaysLife())
+
 if __name__ == "__main__":
     Main()
